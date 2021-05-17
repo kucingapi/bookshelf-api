@@ -168,5 +168,26 @@ const changeBookById = (request, h) =>{
     return response;
 }
 
+const deleteBookById = (request,h) => {
+    const {bookId} = request.params;
+    const bookIndex = books.findIndex((index) => index.id == bookId);
 
-module.exports = { addNewBook, getAllBook, getBookById, changeBookById};
+    if(bookIndex >= 0){
+        books.splice(bookIndex);
+        const response = h.response({
+            status: 'success',
+            message: 'Buku berhasil dihapus',
+        })
+        response.code(200);
+        return response;
+    }
+
+    const response = h.response({
+        status: 'fail',
+        message: 'Buku gagal dihapus. Id tidak ditemukan',
+    })
+    response.code(404);
+    return response;
+}
+
+module.exports = { addNewBook, getAllBook, getBookById, changeBookById, deleteBookById};
