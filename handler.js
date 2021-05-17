@@ -76,33 +76,43 @@ const addNewBook = (request, h) => {
 const getAllBook = (request, h) =>{
     const query = request.query;
 
-    const newBooks = books.map((book) => ({id:book.id,name:book.name,publisher:book.publisher}));
-    if(query.name !== undefined){
+    var newBooks = books.map((book) => ({id:book.id,name:book.name,publisher:book.publisher}));
 
-        const booksNew = newBooks.filter((book) => book.name.toLowerCase().includes(query.name.toLowerCase()));
-        
-        const response = h.response({
-            status: 'success',
-            data:{
-                'books': booksNew
-            }
-            
-        });
+    if(query.name !== undefined){
+        newBooks = 
+        newBooks.filter(
+            (book) => book.name.toLowerCase().includes(
+                query.name.toLowerCase()
+            )
+        );
+    }
+
+    if(query.reading !== undefined){
+        newBooks = 
+        books.filter(
+            (book) => book.reading === Boolean(query.reading)
+        ); 
+        newBooks = newBooks.map((book) => ({id:book.id,name:book.name,publisher:book.publisher}));
+    }
+
+    if(query.finished !== undefined){
+        console.log(query.finished);
+        newBooks = 
+        books.filter(
+            (book) => book.finished === Boolean(parseInt(query.finished))
+        ); 
+        console.log(newBooks);
+        newBooks = newBooks.map((book) => ({id:book.id,name:book.name,publisher:book.publisher}));
+    }
+    const response = h.response({
+        status: 'success',
+        data:{
+            books: newBooks,
+        } 
+    });
     
-        response.code(200);
-        return response;
-    }
-    else{
-        const response = h.response({
-            status: 'success',
-            data:{
-                books: newBooks,
-            } 
-        });
-        
-        response.code(200);
-        return response;
-    }
+    response.code(200);
+    return response;
 }
 
 const getBookById = (request, h) => {
