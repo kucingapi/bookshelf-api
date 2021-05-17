@@ -11,12 +11,12 @@ const addNewBook = (request, h) => {
             pageCount, 
             readPage, 
             reading
-        } = JSON.parse(request.payload);
+        } = request.payload;
 
     const id = nanoid(16);
     const finished = readPage === pageCount;
-    const insertDate = new Date().toISOString();
-    const updateDate = insertDate;
+    const insertedAt = new Date().toISOString();
+    const updatedAt = insertedAt;
 
     if( name === undefined){
         const response = h.response({
@@ -47,7 +47,8 @@ const addNewBook = (request, h) => {
         readPage,
         finished,
         reading,
-        updateDate
+        insertedAt,
+        updatedAt
     };
 
     books.push(newBook);
@@ -73,20 +74,40 @@ const addNewBook = (request, h) => {
 }
 
 const getAllBook = (request, h) =>{
-    const response = h.response({
-        status: 'success',
-        data:{
-            books,
-        } 
-    })
-    response.code(200);
-    return response;
+    const query = request.query;
+
+    const newBooks = books.map((book) => ({id:book.id,name:book.name,publisher:book.publisher}));
+    if(query.name !== undefined){
+
+        const booksNew = newBooks.filter((book) => book.name.toLowerCase().includes(query.name.toLowerCase()));
+        
+        const response = h.response({
+            status: 'success',
+            data:{
+                'books': booksNew
+            }
+            
+        });
+    
+        response.code(200);
+        return response;
+    }
+    else{
+        const response = h.response({
+            status: 'success',
+            data:{
+                books: newBooks,
+            } 
+        });
+        
+        response.code(200);
+        return response;
+    }
 }
 
 const getBookById = (request, h) => {
     const {bookId} = request.params;
     const bookIndex = books.findIndex((index) => index.id == bookId);
-
     if(bookIndex >= 0){
         const book = books[bookIndex];
         const response = h.response({
@@ -117,12 +138,12 @@ const changeBookById = (request, h) =>{
             pageCount, 
             readPage, 
             reading
-        } = JSON.parse(request.payload);
+        } = request.payload;
     
     if( name === undefined){
         const response = h.response({
             status: 'fail',
-            message: 'Gagal menambahkan buku. Mohon isi nama buku'
+            message: 'Gagal memperbarui buku. Mohon isi nama buku'
         })
         response.code(400);
         return response;
@@ -131,7 +152,7 @@ const changeBookById = (request, h) =>{
     if(readPage > pageCount){
         const response = h.response({
             status: 'fail',
-            message: 'Gagal menambahkan buku. readPage tidak boleh lebih besar dari pageCount'
+            message: 'Gagal memperbarui buku. readPage tidak boleh lebih besar dari pageCount'
         })
         response.code(400);
         return response;
@@ -145,7 +166,7 @@ const changeBookById = (request, h) =>{
         response.code(404);
         return response;
     }
-    const updateDate = new Date().toISOString();
+    const updatedAt = new Date().toISOString();
     const finished = readPage === pageCount;
     books[bookIndex] = {
         ...books[bookIndex],
@@ -155,9 +176,10 @@ const changeBookById = (request, h) =>{
         summary,
         publisher,
         pageCount,
+        readPage,
         finished,
         reading,
-        updateDate
+        updatedAt
     }
 
     const response = h.response({
